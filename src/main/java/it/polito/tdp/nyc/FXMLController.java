@@ -5,7 +5,12 @@
 package it.polito.tdp.nyc;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import org.jgrapht.alg.util.Pair;
+
 import it.polito.tdp.nyc.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -39,7 +44,7 @@ public class FXMLController {
     private ComboBox<String> cmbProvider; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbQuartiere"
-    private ComboBox<?> cmbQuartiere; // Value injected by FXMLLoader
+    private ComboBox<String> cmbQuartiere; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtMemoria"
     private TextField txtMemoria; // Value injected by FXMLLoader
@@ -48,21 +53,48 @@ public class FXMLController {
     private TextArea txtResult; // Value injected by FXMLLoader
     
     @FXML // fx:id="clQuartiere"
-    private TableColumn<?, ?> clQuartiere; // Value injected by FXMLLoader
+    private TableColumn<String, ?> clQuartiere; // Value injected by FXMLLoader
  
     @FXML // fx:id="clDistanza"
     private TableColumn<?, ?> clDistanza; // Value injected by FXMLLoader
     
     @FXML // fx:id="tblQuartieri"
-    private TableView<?> tblQuartieri; // Value injected by FXMLLoader
+    private TableView<String> tblQuartieri; // Value injected by FXMLLoader
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+String provider = cmbProvider.getValue();
+    	
+//    	controlli sull'input
+    	if (provider==null) {
+    		this.txtResult.setText("Inersire un provider.\n");
+    		return;
+    	}
+    	
+//    	creazione grafo
+    	this.model.creaGrafo(provider);
+    	
+    	
+//    	stampa grafo
+    	this.txtResult.setText("Grafo creato.\n");
+    	this.txtResult.appendText("Ci sono " + this.model.nVertici() + " vertici\n");
+    	this.txtResult.appendText("Ci sono " + this.model.nArchi() + " archi\n\n");
+    
+    	cmbQuartiere.getItems().addAll(this.model.getVertici());
     	
     }
 
     @FXML
     void doQuartieriAdiacenti(ActionEvent event) {
+    	
+    	String city=cmbQuartiere.getValue();
+    	this.txtResult.appendText("Adiacenti: \n");
+    	List<Pair<String, Double>> adiacenti = this.model.getAdiacenti(city);
+    	for(Pair<String, Double> i : adiacenti) {
+    		this.txtResult.appendText(i + "\n");
+    	}
+    	
     	
     }
 
@@ -87,6 +119,10 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	List<String> providers = this.model.getProvider();
+    	Collections.sort(providers);
+    	cmbProvider.getItems().addAll(providers);
     }
 
 }
